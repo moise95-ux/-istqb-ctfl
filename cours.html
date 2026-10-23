@@ -9,7 +9,8 @@
 <body>
 <header><div class="wrap"><h1 id="pageTitle">Cours ISTQB CTFL v4.0.1</h1><p>Apprendre · s'entraîner · mesurer son niveau</p></div></header>
 <div class="wrap">
-<nav class="nav"><a href="./index.html">Accueil</a><a class="active" href="./cours.html">Cours & QCM</a></nav>
+<nav class="nav"><a href="./index.html">Accueil</a>
+<a href="./ressources.html">📚 Ressources</a><a class="active" href="./cours.html">Cours & QCM</a></nav>
 <div id="app"></div>
 </div>
 <footer>Questions originales inspirées des objectifs et notions CTFL v4.0.1. Aucun examen officiel n'est reproduit mot pour mot.</footer>
@@ -127,7 +128,7 @@ function renderResult(score,total,isExam){
  document.getElementById('app').innerHTML=`
  <div class="result"><span class="badge">RESULTAT</span><h2 class="${pass?'pass':'fail'}">${score}/${total} — ${Math.round(score/total*100)}%</h2>
  <p>${isExam?(pass?'🎉 Réussi — seuil CTFL : 26/40.':'❌ Non réussi — seuil CTFL : 26/40.'):(pass?'Bon niveau sur ce chapitre.':'À revoir : relis le cours puis refais le QCM.')}</p>
- <div class="actions"><button class="btn primary" onclick="${isExam?'location.href=\\'./index.html\\'':'location.href=\\'./cours.html#ch'+chapter+'\\''}">Continuer</button>
+ <div class="actions"><button class="btn primary" onclick="${isExam ? "location.href='./index.html'" : "location.href='./cours.html#ch"+chapter+"'"}">Continuer</button>
  <button class="btn" onclick="location.reload()">Recommencer</button></div></div>
  <h2>Correction détaillée</h2>${review}`;
 }
