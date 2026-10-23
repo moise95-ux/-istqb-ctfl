@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#111827">
+<link rel="manifest" href="manifest.json">
+<title>ISTQB CTFL v4.0.1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f5f7fb;color:#111827}
+header{position:sticky;top:0;z-index:5;background:#111827;color:white;padding:18px 16px calc(14px + env(safe-area-inset-top));}
+header h1{font-size:20px;margin:0 0 4px}.sub{font-size:13px;opacity:.75}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 4px calc(8px + env(safe-area-inset-bottom));z-index:10}
+nav button{border:0;background:none;font-size:11px;color:#667085;padding:6px 4px}nav button.active{color:#111827;font-weight:700}
+main{max-width:760px;margin:auto;padding:18px 16px 90px}.card{background:white;border-radius:16px;padding:18px;margin:12px 0;box-shadow:0 2px 10px #0000000b}
+h2{margin:4px 0 12px;font-size:22px}h3{margin:8px 0}.muted{color:#667085}.grid{display:grid;gap:12px}
+button.primary{width:100%;border:0;border-radius:12px;background:#111827;color:white;padding:14px;font-size:16px;font-weight:700}
+button.secondary{width:100%;border:1px solid #d0d5dd;border-radius:12px;background:white;padding:12px;font-size:15px}
+.progress{height:10px;background:#e5e7eb;border-radius:10px;overflow:hidden}.bar{height:100%;background:#111827}
+.option{width:100%;text-align:left;border:1px solid #d0d5dd;background:white;border-radius:12px;padding:13px;margin:7px 0;font-size:15px}
+.option.selected{border:2px solid #111827}.option.correct{border-color:#16a34a;background:#f0fdf4}.option.wrong{border-color:#dc2626;background:#fef2f2}
+.badge{display:inline-block;background:#eef2ff;padding:5px 9px;border-radius:99px;font-size:12px}.result{font-size:28px;font-weight:800}
+.row{display:flex;gap:10px;align-items:center;justify-content:space-between}.small{font-size:13px}
+ul{padding-left:20px;line-height:1.6}.chapter{cursor:pointer}
+</style>
+</head>
+<body>
+<header><h1>ISTQB CTFL v4.0.1</h1><div class="sub">Préparation à la certification — cours, quiz et examens blancs</div></header>
+<main id="app"></main>
+<nav>
+<button type="button" onclick="show('home')" id="n-home">🏠<br>Accueil</button>
+<button type="button" onclick="show('course')" id="n-course">📚<br>Cours</button>
+<button type="button" onclick="show('quiz')" id="n-quiz">📝<br>Quiz</button>
+<button type="button" onclick="show('exam')" id="n-exam">🎯<br>Examen</button>
+<button type="button" onclick="show('stats')" id="n-stats">📊<br>Progression</button>
+</nav>
+<script>
+const app = document.getElementById("app");
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+const chapters=[
+["Chapitre 1","Fondamentaux des tests","Pourquoi tester, principes, processus, testware, traçabilité et rôles."],
+["Chapitre 2","Tester pendant le cycle de vie","Développement logiciel, niveaux/types de tests et tests de maintenance."],
+["Chapitre 3","Tests statiques","Revues, feedback, rôles et facteurs de succès."],
+["Chapitre 4","Techniques de test","Boîte noire, boîte blanche et techniques basées sur l'expérience."],
+["Chapitre 5","Gestion des tests","Plan de test, risques, estimation, priorisation, suivi et rapports."],
+["Chapitre 6","Outils de test","Types d'outils, avantages, risques et introduction à l'automatisation."]
+];
+
+const questions=[
+{c:1,q:"Quel est l'un des objectifs principaux des tests ?",a:["Prouver qu'il n'existe aucun défaut","Réduire les risques et fournir des informations sur la qualité","Remplacer le débogage","Garantir une couverture de 100 %"],ok:1,e:"Les tests fournissent des informations permettant d'évaluer et réduire les risques ; ils ne prouvent pas l'absence de défauts."},
+{c:1,q:"Quelle affirmation distingue correctement test et débogage ?",a:["Le test localise toujours le défaut","Le débogage est une activité de test","Le test peut révéler des défaillances, le débogage recherche et corrige leurs causes","Ils sont exactement identiques"],ok:2,e:"Le test peut mettre en évidence une défaillance ; le débogage cherche la cause et corrige le défaut."},
+{c:1,q:"Quelle séquence est correcte ?",a:["Défaut → erreur → défaillance","Erreur → défaut → défaillance","Défaillance → erreur → défaut","Erreur → défaillance → défaut"],ok:1,e:"Une erreur humaine peut introduire un défaut dans le logiciel, qui peut ensuite provoquer une défaillance à l'exécution."},
+{c:1,q:"Pourquoi les tests exhaustifs sont-ils généralement impossibles ?",a:["Les testeurs n'ont jamais assez de compétences","Le nombre de combinaisons peut être énorme et les ressources sont limitées","Les outils l'interdisent","Les développeurs les refusent"],ok:1,e:"Il faut donc prioriser les tests selon les risques, objectifs et contraintes."},
+{c:1,q:"Quel principe dit que répéter les mêmes tests finit par trouver moins de nouveaux défauts ?",a:["Absence d'erreurs","Pesticide paradox","Testing shows absence","Early testing"],ok:1,e:"Le pesticide paradox implique de faire évoluer les tests pour conserver leur efficacité."},
+{c:1,q:"Que signifie 'absence-of-errors fallacy' ?",a:["Un logiciel sans défaut connu est nécessairement utile","Éliminer les défauts connus ne garantit pas que le système répond aux besoins","Les erreurs sont toujours invisibles","Les tests sont inutiles"],ok:1,e:"Un système peut être techniquement correct mais ne pas satisfaire les besoins réels des utilisateurs."},
+{c:1,q:"Quel principe recommande de commencer les activités de test le plus tôt possible ?",a:["Early testing","Pesticide paradox","Defect clustering","Context-dependent testing"],ok:0,e:"Tester tôt permet de détecter les défauts plus rapidement et peut réduire le coût de correction."},
+{c:1,q:"Que signifie le principe de defect clustering ?",a:["Les défauts sont répartis uniformément","Une petite partie des composants contient souvent une grande partie des défauts","Les défauts ne peuvent être corrigés","Les défauts apparaissent uniquement en production"],ok:1,e:"Les défauts ont tendance à se concentrer dans un nombre limité de composants."},
+{c:1,q:"Pourquoi la traçabilité est-elle utile ?",a:["Elle remplace les tests","Elle permet notamment de relier les exigences aux tests et résultats","Elle garantit zéro défaut","Elle supprime les risques"],ok:1,e:"La traçabilité aide à évaluer la couverture et à relier exigences, tests et résultats."},
+{c:1,q:"Les tests sont-ils identiques dans tous les contextes ?",a:["Oui","Non, ils dépendent du contexte","Seulement en Agile","Seulement pour les tests automatisés"],ok:1,e:"Les objectifs, risques, contraintes et techniques varient selon le contexte."},
+
+{c:2,q:"Quel niveau de test se concentre principalement sur les composants individuels ?",a:["Test système","Test d'acceptation","Test composant","Test d'intégration"],ok:2,e:"Le test composant vérifie des composants isolément, selon le contexte."},
+{c:2,q:"Quel type de test vise principalement des caractéristiques comme la performance ou la sécurité ?",a:["Test fonctionnel","Test non fonctionnel","Test de maintenance","Test composant"],ok:1,e:"Les tests non fonctionnels évaluent des caractéristiques de qualité autres que les fonctions métier."},
+{c:2,q:"Quel test vérifie les interactions entre composants ou systèmes ?",a:["Test d'intégration","Test d'acceptation","Test unitaire uniquement","Test exploratoire uniquement"],ok:0,e:"Les tests d'intégration portent sur les interfaces et interactions."},
+{c:2,q:"Un test d'acceptation vise principalement à ?",a:["Vérifier uniquement le code","Évaluer si le système répond aux besoins métier et critères d'acceptation","Remplacer les tests système","Mesurer uniquement la vitesse"],ok:1,e:"Il aide à déterminer si le système est acceptable pour les parties prenantes."},
+{c:2,q:"Quel est un avantage d'une approche de développement itérative ?",a:["Elle interdit le feedback","Elle permet un feedback plus précoce et fréquent","Elle rend les tests inutiles","Elle garantit zéro régression"],ok:1,e:"Les itérations favorisent le feedback et permettent d'ajuster plus tôt."},
+
+{c:3,q:"Les tests statiques exécutent-ils le logiciel ?",a:["Toujours","Non, ils examinent des produits de travail sans exécuter le code","Uniquement en production","Seulement avec automatisation"],ok:1,e:"Les revues et analyses statiques peuvent détecter des défauts sans exécution du logiciel."},
+{c:3,q:"Lequel est un exemple de test statique ?",a:["Revue de code","Test de charge","Test de régression exécuté","Test système"],ok:0,e:"La revue de code est une activité statique."},
+{c:3,q:"Quel est un bénéfice majeur du feedback précoce ?",a:["Il augmente toujours le coût","Il aide à détecter et corriger plus tôt les problèmes","Il supprime la nécessité des tests dynamiques","Il garantit l'absence de défauts"],ok:1,e:"Un feedback rapide permet de corriger les problèmes avant qu'ils ne deviennent plus coûteux."},
+{c:3,q:"Une revue formelle possède généralement ?",a:["Aucune préparation","Un processus défini avec rôles et activités","Uniquement un développeur","Uniquement un outil"],ok:1,e:"Les revues formelles ont un processus, des rôles et des critères définis."},
+{c:3,q:"Lequel favorise le succès d'une revue ?",a:["Objectifs clairs","Blâmer les auteurs","Aucune préparation","Discuter uniquement des personnes"],ok:0,e:"Des objectifs clairs, une préparation adaptée et une culture constructive favorisent les revues."},
+
+{c:4,q:"Quelle technique divise un domaine de valeurs en groupes dont on s'attend à un comportement similaire ?",a:["Partage d'équivalence","Transition d'état","Test de mutation","Revue"],ok:0,e:"Le partitionnement en classes d'équivalence permet de sélectionner des représentants de groupes."},
+{c:4,q:"Quel est l'objectif principal de l'analyse des valeurs limites ?",a:["Tester uniquement les valeurs moyennes","Cibler les limites des partitions","Éviter les cas extrêmes","Remplacer les tests statiques"],ok:1,e:"Les défauts sont souvent présents aux frontières des domaines de valeurs."},
+{c:4,q:"Les tests de transition d'état sont particulièrement adaptés quand ?",a:["Le comportement dépend d'états et de transitions","Il n'y a aucun état","On teste uniquement le code source","On fait une revue documentaire"],ok:0,e:"Ils modélisent les états, événements et transitions du système."},
+{c:4,q:"Quel test utilise la structure interne du code pour concevoir les tests ?",a:["Boîte noire","Boîte blanche","Exploratoire uniquement","Acceptation"],ok:1,e:"Les techniques boîte blanche utilisent la structure interne du logiciel."},
+{c:4,q:"Le test exploratoire combine généralement ?",a:["Apprentissage, conception et exécution des tests de façon dynamique","Uniquement l'automatisation","Uniquement la lecture des exigences","Uniquement les tests de performance"],ok:0,e:"L'apprentissage influence la conception et l'exécution dans une boucle dynamique."},
+
+{c:5,q:"Quel document décrit généralement l'approche, les activités et les objectifs de test ?",a:["Plan de test","Journal personnel","Code source","Manuel utilisateur uniquement"],ok:0,e:"Le plan de test décrit l'approche et les activités prévues, selon le contexte."},
+{c:5,q:"La priorisation des tests peut notamment s'appuyer sur ?",a:["Les risques","L'ordre alphabétique uniquement","La taille des écrans","Le nom du testeur"],ok:0,e:"Les risques aident à déterminer quels tests exécuter en priorité."},
+{c:5,q:"Quel est l'intérêt du suivi et contrôle des tests ?",a:["Comparer l'avancement réel aux objectifs et prendre des actions si nécessaire","Éviter les rapports","Supprimer les défauts automatiquement","Garantir zéro échec"],ok:0,e:"Le suivi permet de comparer les résultats aux objectifs et d'ajuster les activités."},
+{c:5,q:"Qu'est-ce qu'un risque produit ?",a:["Un risque lié à la qualité ou au comportement du produit","Un risque uniquement financier du projet","Une absence de test","Un rôle de testeur"],ok:0,e:"Le risque produit concerne la possibilité qu'un produit ne satisfasse pas certaines attentes de qualité."},
+{c:5,q:"Une bonne estimation des tests tient compte notamment de ?",a:["La portée, les risques, les ressources et les contraintes","Uniquement du nombre de testeurs","Uniquement du nombre d'écrans","Uniquement du calendrier"],ok:0,e:"L'estimation dépend de nombreux facteurs du projet et du contexte."},
+
+{c:6,q:"Quel est un bénéfice potentiel de l'automatisation des tests ?",a:["Réduire le temps d'exécution des tests répétitifs","Éliminer toute intervention humaine","Garantir zéro défaut","Rendre tous les tests faciles"],ok:0,e:"L'automatisation peut être très efficace pour des tâches répétitives, mais elle ne remplace pas le jugement humain."},
+{c:6,q:"Quel est un risque lié à l'automatisation ?",a:["Coûts de maintenance des tests automatisés","Aucun","Elle rend le logiciel parfait","Elle supprime tous les défauts"],ok:0,e:"Les scripts et environnements automatisés doivent être maintenus."},
+{c:6,q:"Quel outil peut aider à gérer et suivre les tests ?",a:["Outil de gestion des tests","Éditeur d'image uniquement","Lecteur vidéo uniquement","Calculatrice"],ok:0,e:"Les outils de gestion des tests peuvent aider à concevoir, suivre et rapporter les tests."},
+{c:6,q:"L'automatisation est-elle adaptée à tous les tests ?",a:["Oui, sans exception","Non, il faut choisir les tests selon leur valeur, stabilité et contexte","Seulement aux tests manuels","Seulement aux tests d'acceptation"],ok:1,e:"Le choix doit prendre en compte les bénéfices, coûts, risques et caractéristiques des tests."},
+{c:6,q:"Quel est un risque organisationnel de l'outil de test ?",a:["Dépendance à l'outil ou attentes irréalistes","Une meilleure traçabilité","Une exécution plus rapide","Une centralisation des résultats"],ok:0,e:"Les outils apportent des bénéfices mais aussi des risques : dépendance, coûts, attentes irréalistes, etc."}
+];
+
+let state=JSON.parse(localStorage.getItem("istqbV2")||'{"scores":[],"mistakes":[],"chapter":1}');
+let current=null, answers=[], examMode=false;
+
+function save(){localStorage.setItem("istqbV2",JSON.stringify(state))}
+window.save=save;
+function show(page){
+ document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
+ const n=document.getElementById("n-"+page); if(n)n.classList.add("active");
+ if(page==="home")home(); if(page==="course")course(); if(page==="quiz")startQuiz(); if(page==="exam")startExam(); if(page==="stats")stats();
+ window.scrollTo(0,0);
+}
+window.show=show;
+function home(){
+ app.innerHTML=`<div class="card"><span class="badge">CTFL v4.0.1</span><h2>Prépare ta certification ISTQB</h2><p class="muted">Cours, quiz, examens blancs et suivi de progression.</p><button type="button" class="primary" onclick="show('exam')">Commencer un examen blanc</button></div>
+ <div class="card"><h3>Ton objectif</h3><p>Entraîne-toi sur les 6 chapitres et vise au moins <b>26/40</b> à l'examen blanc.</p><div class="progress"><div class="bar" style="width:${Math.min(100,(state.scores.length?Math.max(...state.scores.map(x=>x.pct)):0))}%"></div></div></div>
+ <div class="card"><h3>Les 6 chapitres</h3><div class="grid">${chapters.map((x,i)=>`<div class="card chapter" onclick="course(${i+1})"><b>${x[0]} — ${x[1]}</b><p class="muted small">${x[2]}</p></div>`).join("")}</div></div>`;
+}
+function course(ch){
+ if(ch){state.chapter=ch;save()}
+ const c=chapters[(state.chapter||1)-1];
+ const notes=[
+ ["Comprendre pourquoi tester","Les tests détectent des défauts et fournissent des informations. Ils ne prouvent pas l'absence de défauts. Retenir les 7 principes : testing shows presence, exhaustive impossible, early testing, defect clustering, pesticide paradox, context-dependent testing, absence-of-errors fallacy.","À mémoriser : erreur → défaut → défaillance. Test ≠ débogage."],
+ ["Tester dans le cycle de vie","Connaître les niveaux de test (composant, intégration, système, acceptation), les types de test et l'intérêt des approches itératives.","À mémoriser : fonctionnel = ce que fait le système ; non fonctionnel = comment il se comporte."],
+ ["Tests statiques","Les revues et analyses statiques examinent les produits de travail sans exécuter le logiciel. Elles permettent un feedback précoce.","À mémoriser : préparation, rôles, objectifs et culture constructive."],
+ ["Techniques de test","Maîtriser partitionnement en classes d'équivalence, analyse des valeurs limites, tables de décision, transitions d'état, cas d'utilisation et techniques boîte blanche.","À mémoriser : choisir la technique selon le problème et le contexte."],
+ ["Gestion des tests","Planifier, estimer, prioriser selon les risques, suivre les résultats et communiquer l'avancement.","À mémoriser : risques produit et risques projet ne sont pas identiques."],
+ ["Outils de test","Comprendre les catégories d'outils, leurs bénéfices et leurs risques. L'automatisation accélère certaines activités mais demande maintenance et compétences.","À mémoriser : un outil ne remplace pas le jugement du testeur."]
+ ];
+ const x=notes[(state.chapter||1)-1];
+ app.innerHTML=`<div class="card"><span class="badge">${c[0]}</span><h2>${c[1]}</h2><h3>${x[0]}</h3><p>${x[1]}</p><div class="card"><b>${x[2]}</b></div><button type="button" class="primary" onclick="show('quiz')">Quiz du chapitre</button></div>
+ <div class="card"><h3>Navigation</h3>${chapters.map((z,i)=>`<button type="button" class="secondary" style="margin:5px 0" onclick="course(${i+1})">${z[0]} — ${z[1]}</button>`).join("")}</div>`;
+}
+window.course=course;
+function shuffle(a){return a.sort(()=>Math.random()-.5)}
+function buildQuiz(count,exam){
+ let pool=shuffle([...questions]); if(exam) pool=pool.slice(0,40); else pool=pool.filter(q=>q.c===state.chapter).slice(0,10);
+ return pool;
+}
+function startQuiz(){examMode=false;current=buildQuiz(10,false);answers=[];renderQuestion(0)}
+function startExam(){examMode=true;current=buildQuiz(40,true);answers=[];renderQuestion(0)}
+function renderQuestion(i){
+ if(i>=current.length){finish();return}
+ const q=current[i], chosen=answers[i];
+ app.innerHTML=`<div class="card"><div class="row"><span class="badge">${examMode?"Examen blanc":"Quiz chapitre "+state.chapter}</span><span class="small">${i+1}/${current.length}</span></div><div class="progress" style="margin:14px 0"><div class="bar" style="width:${i/current.length*100}%"></div></div><h2>${q.q}</h2>${q.a.map((a,j)=>`<button type="button" class="option ${chosen===j?"selected":""}" onclick="pick(${i},${j})">${String.fromCharCode(65+j)}. ${a}</button>`).join("")}<button type="button" class="primary" style="margin-top:12px" onclick="next(${i})">${i===current.length-1?"Terminer":"Suivant"}</button></div>`;
+}
+function pick(i,j){answers[i]=j;renderQuestion(i)}
+window.pick=pick;
+function next(i){if(answers[i]===undefined){alert("Choisis une réponse.");return}renderQuestion(i+1)}
+function finish(){
+ let correct=current.reduce((n,q,i)=>n+(answers[i]===q.ok?1:0),0);
+ let pct=Math.round(correct/current.length*100), pass=examMode?correct>=26:correct>=Math.ceil(current.length*.7);
+ state.scores.push({date:new Date().toLocaleString("fr-FR"),score:correct,total:current.length,pct,exam:examMode});
+ current.forEach((q,i)=>{if(answers[i]!==q.ok)state.mistakes.push({q:q.q,chapter:q.c,correct:q.a[q.ok],given:answers[i]===undefined?"":q.a[answers[i]],e:q.e})});
+ save();
+ app.innerHTML=`<div class="card"><span class="badge">${examMode?"Examen blanc":"Quiz"}</span><div class="result">${correct}/${current.length}</div><h2>${pass?"Bravo, objectif atteint !":"À retravailler"}</h2><p>${examMode?"Seuil examen blanc : 26/40.": "Objectif conseillé : 70 %."}</p><div class="progress"><div class="bar" style="width:${pct}%"></div></div></div>
+ <div class="card"><h3>Révision des erreurs</h3>${current.map((q,i)=>answers[i]!==q.ok?`<div style="margin:12px 0"><b>${q.q}</b><p class="small">Bonne réponse : <b>${q.a[q.ok]}</b></p><p class="muted small">${q.e}</p></div>`:"").join("")||"<p>Aucune erreur 🎉</p>"}</div>
+ <button type="button" class="primary" onclick="${examMode?"show('exam')":"show('quiz')"}">Recommencer</button>`;
+}
+window.next=next;
+function stats(){
+ const s=state.scores, avg=s.length?Math.round(s.reduce((a,x)=>a+x.pct,0)/s.length):0;
+ app.innerHTML=`<div class="card"><h2>Ma progression</h2><p>Sessions : <b>${s.length}</b></p><p>Moyenne : <b>${avg}%</b></p><p>Questions à revoir : <b>${state.mistakes.length}</b></p></div>
+ <div class="card"><h3>Historique</h3>${s.slice().reverse().slice(0,15).map(x=>`<div class="row" style="padding:9px 0;border-bottom:1px solid #eee"><span>${x.exam?"Examen":"Quiz"} — ${x.date}</span><b>${x.score}/${x.total}</b></div>`).join("")||"<p class='muted'>Aucun résultat.</p>"}</div>
+ <div class="card"><h3>Questions ratées</h3>${state.mistakes.slice(-10).reverse().map(x=>`<p><b>${x.q}</b><br><span class="small">Bonne réponse : ${x.correct}</span></p>`).join("")||"<p class='muted'>Aucune question ratée.</p>"}</div>
+ <button type="button" class="secondary" onclick="if(confirm('Effacer toute la progression ?')){localStorage.removeItem('istqbV2');location.reload()}">Réinitialiser la progression</button>`;
+}
+show('home');
+</script>
+</body>
+</html>

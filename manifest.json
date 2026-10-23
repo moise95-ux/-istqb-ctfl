@@ -1,0 +1,9 @@
+{
+  "name": "ISTQB CTFL v4.0.1",
+  "short_name": "ISTQB CTFL",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f5f7fb",
+  "theme_color": "#111827",
+  "icons": []
+}
