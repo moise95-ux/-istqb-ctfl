@@ -28,13 +28,14 @@ ul{padding-left:20px;line-height:1.6}.chapter{cursor:pointer}
 <header><h1>ISTQB CTFL v4.0.1</h1><div class="sub">Préparation à la certification — cours, quiz et examens blancs</div></header>
 <main id="app"></main>
 <nav>
-<button onclick="show('home')" id="n-home">🏠<br>Accueil</button>
-<button onclick="show('course')" id="n-course">📚<br>Cours</button>
-<button onclick="show('quiz')" id="n-quiz">📝<br>Quiz</button>
-<button onclick="show('exam')" id="n-exam">🎯<br>Examen</button>
-<button onclick="show('stats')" id="n-stats">📊<br>Progression</button>
+<button type="button" onclick="show('home')" id="n-home">🏠<br>Accueil</button>
+<button type="button" onclick="show('course')" id="n-course">📚<br>Cours</button>
+<button type="button" onclick="show('quiz')" id="n-quiz">📝<br>Quiz</button>
+<button type="button" onclick="show('exam')" id="n-exam">🎯<br>Examen</button>
+<button type="button" onclick="show('stats')" id="n-stats">📊<br>Progression</button>
 </nav>
 <script>
+const app = document.getElementById("app");
 if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
 const chapters=[
 ["Chapitre 1","Fondamentaux des tests","Pourquoi tester, principes, processus, testware, traçabilité et rôles."],
@@ -92,14 +93,16 @@ let state=JSON.parse(localStorage.getItem("istqbV2")||'{"scores":[],"mistakes":[
 let current=null, answers=[], examMode=false;
 
 function save(){localStorage.setItem("istqbV2",JSON.stringify(state))}
+window.save=save;
 function show(page){
  document.querySelectorAll("nav button").forEach(x=>x.classList.remove("active"));
  const n=document.getElementById("n-"+page); if(n)n.classList.add("active");
  if(page==="home")home(); if(page==="course")course(); if(page==="quiz")startQuiz(); if(page==="exam")startExam(); if(page==="stats")stats();
  window.scrollTo(0,0);
 }
+window.show=show;
 function home(){
- app.innerHTML=`<div class="card"><span class="badge">CTFL v4.0.1</span><h2>Prépare ta certification ISTQB</h2><p class="muted">Cours, quiz, examens blancs et suivi de progression.</p><button class="primary" onclick="show('exam')">Commencer un examen blanc</button></div>
+ app.innerHTML=`<div class="card"><span class="badge">CTFL v4.0.1</span><h2>Prépare ta certification ISTQB</h2><p class="muted">Cours, quiz, examens blancs et suivi de progression.</p><button type="button" class="primary" onclick="show('exam')">Commencer un examen blanc</button></div>
  <div class="card"><h3>Ton objectif</h3><p>Entraîne-toi sur les 6 chapitres et vise au moins <b>26/40</b> à l'examen blanc.</p><div class="progress"><div class="bar" style="width:${Math.min(100,(state.scores.length?Math.max(...state.scores.map(x=>x.pct)):0))}%"></div></div></div>
  <div class="card"><h3>Les 6 chapitres</h3><div class="grid">${chapters.map((x,i)=>`<div class="card chapter" onclick="course(${i+1})"><b>${x[0]} — ${x[1]}</b><p class="muted small">${x[2]}</p></div>`).join("")}</div></div>`;
 }
@@ -115,9 +118,10 @@ function course(ch){
  ["Outils de test","Comprendre les catégories d'outils, leurs bénéfices et leurs risques. L'automatisation accélère certaines activités mais demande maintenance et compétences.","À mémoriser : un outil ne remplace pas le jugement du testeur."]
  ];
  const x=notes[(state.chapter||1)-1];
- app.innerHTML=`<div class="card"><span class="badge">${c[0]}</span><h2>${c[1]}</h2><h3>${x[0]}</h3><p>${x[1]}</p><div class="card"><b>${x[2]}</b></div><button class="primary" onclick="show('quiz')">Quiz du chapitre</button></div>
- <div class="card"><h3>Navigation</h3>${chapters.map((z,i)=>`<button class="secondary" style="margin:5px 0" onclick="course(${i+1})">${z[0]} — ${z[1]}</button>`).join("")}</div>`;
+ app.innerHTML=`<div class="card"><span class="badge">${c[0]}</span><h2>${c[1]}</h2><h3>${x[0]}</h3><p>${x[1]}</p><div class="card"><b>${x[2]}</b></div><button type="button" class="primary" onclick="show('quiz')">Quiz du chapitre</button></div>
+ <div class="card"><h3>Navigation</h3>${chapters.map((z,i)=>`<button type="button" class="secondary" style="margin:5px 0" onclick="course(${i+1})">${z[0]} — ${z[1]}</button>`).join("")}</div>`;
 }
+window.course=course;
 function shuffle(a){return a.sort(()=>Math.random()-.5)}
 function buildQuiz(count,exam){
  let pool=shuffle([...questions]); if(exam) pool=pool.slice(0,40); else pool=pool.filter(q=>q.c===state.chapter).slice(0,10);
@@ -128,9 +132,10 @@ function startExam(){examMode=true;current=buildQuiz(40,true);answers=[];renderQ
 function renderQuestion(i){
  if(i>=current.length){finish();return}
  const q=current[i], chosen=answers[i];
- app.innerHTML=`<div class="card"><div class="row"><span class="badge">${examMode?"Examen blanc":"Quiz chapitre "+state.chapter}</span><span class="small">${i+1}/${current.length}</span></div><div class="progress" style="margin:14px 0"><div class="bar" style="width:${i/current.length*100}%"></div></div><h2>${q.q}</h2>${q.a.map((a,j)=>`<button class="option ${chosen===j?"selected":""}" onclick="pick(${i},${j})">${String.fromCharCode(65+j)}. ${a}</button>`).join("")}<button class="primary" style="margin-top:12px" onclick="next(${i})">${i===current.length-1?"Terminer":"Suivant"}</button></div>`;
+ app.innerHTML=`<div class="card"><div class="row"><span class="badge">${examMode?"Examen blanc":"Quiz chapitre "+state.chapter}</span><span class="small">${i+1}/${current.length}</span></div><div class="progress" style="margin:14px 0"><div class="bar" style="width:${i/current.length*100}%"></div></div><h2>${q.q}</h2>${q.a.map((a,j)=>`<button type="button" class="option ${chosen===j?"selected":""}" onclick="pick(${i},${j})">${String.fromCharCode(65+j)}. ${a}</button>`).join("")}<button type="button" class="primary" style="margin-top:12px" onclick="next(${i})">${i===current.length-1?"Terminer":"Suivant"}</button></div>`;
 }
 function pick(i,j){answers[i]=j;renderQuestion(i)}
+window.pick=pick;
 function next(i){if(answers[i]===undefined){alert("Choisis une réponse.");return}renderQuestion(i+1)}
 function finish(){
  let correct=current.reduce((n,q,i)=>n+(answers[i]===q.ok?1:0),0);
@@ -140,14 +145,15 @@ function finish(){
  save();
  app.innerHTML=`<div class="card"><span class="badge">${examMode?"Examen blanc":"Quiz"}</span><div class="result">${correct}/${current.length}</div><h2>${pass?"Bravo, objectif atteint !":"À retravailler"}</h2><p>${examMode?"Seuil examen blanc : 26/40.": "Objectif conseillé : 70 %."}</p><div class="progress"><div class="bar" style="width:${pct}%"></div></div></div>
  <div class="card"><h3>Révision des erreurs</h3>${current.map((q,i)=>answers[i]!==q.ok?`<div style="margin:12px 0"><b>${q.q}</b><p class="small">Bonne réponse : <b>${q.a[q.ok]}</b></p><p class="muted small">${q.e}</p></div>`:"").join("")||"<p>Aucune erreur 🎉</p>"}</div>
- <button class="primary" onclick="${examMode?"show('exam')":"show('quiz')"}">Recommencer</button>`;
+ <button type="button" class="primary" onclick="${examMode?"show('exam')":"show('quiz')"}">Recommencer</button>`;
 }
+window.next=next;
 function stats(){
  const s=state.scores, avg=s.length?Math.round(s.reduce((a,x)=>a+x.pct,0)/s.length):0;
  app.innerHTML=`<div class="card"><h2>Ma progression</h2><p>Sessions : <b>${s.length}</b></p><p>Moyenne : <b>${avg}%</b></p><p>Questions à revoir : <b>${state.mistakes.length}</b></p></div>
  <div class="card"><h3>Historique</h3>${s.slice().reverse().slice(0,15).map(x=>`<div class="row" style="padding:9px 0;border-bottom:1px solid #eee"><span>${x.exam?"Examen":"Quiz"} — ${x.date}</span><b>${x.score}/${x.total}</b></div>`).join("")||"<p class='muted'>Aucun résultat.</p>"}</div>
  <div class="card"><h3>Questions ratées</h3>${state.mistakes.slice(-10).reverse().map(x=>`<p><b>${x.q}</b><br><span class="small">Bonne réponse : ${x.correct}</span></p>`).join("")||"<p class='muted'>Aucune question ratée.</p>"}</div>
- <button class="secondary" onclick="if(confirm('Effacer toute la progression ?')){localStorage.removeItem('istqbV2');location.reload()}">Réinitialiser la progression</button>`;
+ <button type="button" class="secondary" onclick="if(confirm('Effacer toute la progression ?')){localStorage.removeItem('istqbV2');location.reload()}">Réinitialiser la progression</button>`;
 }
 show('home');
 </script>
