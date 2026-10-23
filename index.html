@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1e3a8a"><meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="manifest" href="./manifest.json"><link rel="stylesheet" href="./style.css">
+<title>ISTQB CTFL v4.0.1 — Révision</title>
+</head>
+<body>
+<header><div class="wrap">
+<h1>ISTQB CTFL v4.0.1</h1><p>Application de révision — cours, QCM et examens blancs</p>
+</div></header>
+<div class="wrap">
+<nav class="nav">
+<a class="active" href="./index.html">Accueil</a>
+<a href="./cours.html">Cours</a>
+<a href="#qcm">QCM</a>
+<a href="#examens">Examens blancs</a>
+</nav>
+<div class="stats">
+<div class="stat"><b id="statQuestions">0</b><span class="muted small">questions</span></div>
+<div class="stat"><b>40</b><span class="muted small">questions/examen</span></div>
+<div class="stat"><b>26/40</b><span class="muted small">score de réussite</span></div>
+</div>
+
+<section class="card">
+<h2>🎯 Prépare ton CTFL</h2>
+<p>Travaille chapitre par chapitre puis passe un examen blanc de 40 questions avec chronomètre de 60 minutes.</p>
+<div class="callout"><b>Examen :</b> 40 questions · 60 min · réussite à partir de 26/40. Les questions de cette application sont originales et alignées sur les notions du syllabus CTFL v4.0.1.</div>
+</section>
+
+<h2 id="qcm">QCM par chapitre</h2>
+<div id="chapters" class="grid"></div>
+
+<h2 id="examens">Examens blancs</h2>
+<div id="mocks" class="grid"></div>
+
+<section class="card" style="margin-top:16px">
+<h2>📊 Tes statistiques</h2>
+<p id="statsText" class="muted">Aucun examen enregistré pour le moment.</p>
+<button class="btn" onclick="resetStats()">Réinitialiser les statistiques</button>
+</section>
+</div>
+<footer>ISTQB CTFL v4.0.1 · Contenu pédagogique paraphrasé · Questions originales</footer>
+
+<script src="./data.js"></script>
+<script>
+const qs=window.ISTQB_QUESTIONS||[];
+document.getElementById('statQuestions').textContent=qs.length;
+const names=Object.fromEntries(Object.entries(window.ISTQB_COURSES).map(([k,v])=>[k,v.title]));
+document.getElementById('chapters').innerHTML=Object.entries(window.ISTQB_COURSES).map(([ch,c])=>`
+<div class="card chapter-card"><div><div class="chapter-num">CHAPITRE ${ch}</div><h3>${c.title}</h3><p class="muted">${c.intro.substring(0,150)}…</p></div>
+<div class="actions"><a class="btn primary" href="./cours.html#ch${ch}">Voir le cours</a><a class="btn" href="./cours.html?quiz=${ch}">QCM</a></div></div>`).join('');
+document.getElementById('mocks').innerHTML=window.ISTQB_MOCKS.map((_,i)=>`
+<div class="card"><h3>Examen blanc ${i+1}</h3><p class="muted">40 questions · 60 minutes · distribution CTFL</p>
+<a class="btn primary" href="./cours.html?exam=${i}">Commencer l'examen</a></div>`).join('');
+function updateStats(){
+ const s=JSON.parse(localStorage.getItem('istqbStats')||'[]');
+ if(!s.length){document.getElementById('statsText').textContent='Aucun examen enregistré pour le moment.';return}
+ const best=Math.max(...s.map(x=>x.score)); const avg=Math.round(s.reduce((a,b)=>a+b.score,0)/s.length);
+ document.getElementById('statsText').textContent=`${s.length} examen(s) · meilleur score ${best}/40 · moyenne ${avg}/40`;
+}
+function resetStats(){if(confirm('Réinitialiser les statistiques ?')){localStorage.removeItem('istqbStats');updateStats()}}
+updateStats();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(()=>{});
+</script>
+</body></html>
